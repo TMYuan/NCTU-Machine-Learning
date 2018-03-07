@@ -13,6 +13,6 @@ def readfile(file_path):
             line = line.strip().split(',')
             # print(line)
             if line[0] != '' and line[1] != '':
-                x.append(line[0])
-                y.append(line[1])
+                x.append(float(line[0]))
+                y.append(float(line[1]))
     return (x, y)
