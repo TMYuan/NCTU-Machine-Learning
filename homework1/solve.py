@@ -7,16 +7,30 @@ def genfeatures(x, degree):
         features.append([point**base for base in range(degree)])
     return np.array(features)
 
-def genmatrix(features):
+def genmatrix(features, rate):
+    """
+    input: A, rate
+    output: (A^T)(A) - (rate)(I)
+    This function will return (A^T)(A)
+    """
     matrix = np.matmul(features.T, features)
+    matrix -= rate * np.eye(matrix.shape[0])
     return matrix
 
 def genb(features, y):
+    """
+    input: A, b
+    output: (A^T)(b)
+    """
     y = np.array(y).reshape(-1, 1)
     b = np.matmul(features.T, y)
     return b
 
 def LUdecomposition(a):
+    """
+    input: A
+    output: L, U
+    """
     assert a.shape[0] == a.shape[1]
     n = a.shape[0]
     L = np.eye(n)
@@ -30,26 +44,30 @@ def LUdecomposition(a):
     return (L, U)
 
 def LUsolver(L, U, b):
+    """
+    input: L, U, b
+    output: x
+    """
     n = L.shape[0]
-    y = np.zeros((1, n))
-    x = np.zeros((1, n))
+    y = np.zeros((n, 1))
+    x = np.zeros((n, 1))
 
     # Solve y vector
     for i in range(n):
-        y[0][i] = b[0][i]
+        y[i][0] = b[i][0]
         if i != 0:
             for j in range(i):
-                y[0][i] += (-L[i][j]) * y[0][j]
-    print(y)
+                y[i][0] += (-L[i][j]) * y[j][0]
+    # print(y)
 
     # Solve x vector
     for i in reversed(range(n)):
-        x[0][i] = y[0][i]
+        x[i][0] = y[i][0]
         if i != n-1:
             for j in reversed(range(i+1 ,n)):
-                x[0][i] += (-U[i][j]) * x[0][j]
-        x[0][i] /= U[i][i]
-    print(x)
+                x[i][0] += (-U[i][j]) * x[j][0]
+        x[i][0] /= U[i][i]
+    # print(x)
     return x
 
 if __name__ == '__main__':
