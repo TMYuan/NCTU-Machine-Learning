@@ -1,6 +1,7 @@
 import argparse
 import data
 import solve
+import newton
 import numpy as np
 
 parser = argparse.ArgumentParser(description='It is a program for ML HW#1.')
@@ -22,12 +23,12 @@ print('x: {}'.format(x))
 features = solve.genfeatures(x, args.base)
 matrix = solve.genmatrix(features, args.rate)
 b = solve.genb(features, y)
-print('-'*30)
-print(features)
-print('-'*30)
-print(matrix)
-print('-'*30)
-print(b)
+# print('-'*30)
+# print(features)
+# print('-'*30)
+# print(matrix)
+# print('-'*30)
+# print(b)
 
 answer = np.linalg.solve(matrix, b)
 print('-'*30)
@@ -37,3 +38,10 @@ L, U = solve.LUdecomposition(matrix)
 x_answer = solve.LUsolver(L, U, b)
 print('-'*30)
 print(x_answer)
+
+weight = np.zeros((args.base ,1))
+target = np.array(y).reshape(-1, 1)
+hession_inv = newton.getHessionInv(features)
+gradient = newton.getGradient(features, weight, target)
+weight = newton.newtonmethod(hession_inv, gradient, weight)
+print(weight)

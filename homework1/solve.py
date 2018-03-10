@@ -70,15 +70,33 @@ def LUsolver(L, U, b):
     # print(x)
     return x
 
-if __name__ == '__main__':
-    A = np.array([
-        [3., -1., 2.],
-        [6., -1., 5.],
-        [-9., 7., 3.]
-    ])
-    b = np.array([[10., 22., -7.]])
-    L, U = LUdecomposition(A)
-    print(L)
-    print(U)
+def geterror(weight, x, y):
+    base = weight.shape[0]
+    weight_new = weight.flatten()
+    error = 0.0
 
-    x = LUsolver(L, U, b)
+    for (x_, y_) in zip(x, y):
+        predict = 0.0
+        for b in range(base):
+            predict += weight_new[b] * (x_**b)
+            print(predict)
+        error += (predict - y_) ** 2
+    return error
+
+if __name__ == '__main__':
+    # A = np.array([
+    #     [3., -1., 2.],
+    #     [6., -1., 5.],
+    #     [-9., 7., 3.]
+    # ])
+    # b = np.array([[10., 22., -7.]])
+    # L, U = LUdecomposition(A)
+    # print(L)
+    # print(U)
+
+    # x = LUsolver(L, U, b)
+    weight = np.array([[2.], [3.], [2]])
+    x = [3, 7]
+    y = [5, 10]
+    error = geterror(weight, x, y)
+    print(error)
