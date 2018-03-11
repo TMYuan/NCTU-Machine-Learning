@@ -1,4 +1,5 @@
 import numpy as np
+import matrix as mat
 from sklearn.preprocessing import PolynomialFeatures
 
 def genfeatures(x, degree):
@@ -13,7 +14,7 @@ def genmatrix(features, rate):
     output: (A^T)(A) - (rate)(I)
     This function will return (A^T)(A)
     """
-    matrix = np.matmul(features.T, features)
+    matrix = mat.mul(mat.transpose(features), features)
     matrix -= rate * np.eye(matrix.shape[0])
     return matrix
 
@@ -23,52 +24,8 @@ def genb(features, y):
     output: (A^T)(b)
     """
     y = np.array(y).reshape(-1, 1)
-    b = np.matmul(features.T, y)
+    b = mat.mul(mat.transpose(features), y)
     return b
-
-def LUdecomposition(a):
-    """
-    input: A
-    output: L, U
-    """
-    assert a.shape[0] == a.shape[1]
-    n = a.shape[0]
-    L = np.eye(n)
-    # print(L)
-    U = a.copy()
-    for i in range(n-1):
-        pivot = U[i][i]
-        L[i+1:, i] = U[i+1:, i] / pivot
-        for j in range(i+1, n):
-            U[j, :] = U[j, :] - L[j][i] * U[i, :]
-    return (L, U)
-
-def LUsolver(L, U, b):
-    """
-    input: L, U, b
-    output: x
-    """
-    n = L.shape[0]
-    y = np.zeros((n, 1))
-    x = np.zeros((n, 1))
-
-    # Solve y vector
-    for i in range(n):
-        y[i][0] = b[i][0]
-        if i != 0:
-            for j in range(i):
-                y[i][0] += (-L[i][j]) * y[j][0]
-    # print(y)
-
-    # Solve x vector
-    for i in reversed(range(n)):
-        x[i][0] = y[i][0]
-        if i != n-1:
-            for j in reversed(range(i+1 ,n)):
-                x[i][0] += (-U[i][j]) * x[j][0]
-        x[i][0] /= U[i][i]
-    # print(x)
-    return x
 
 def geterror(weight, x, y):
     base = weight.shape[0]
@@ -79,9 +36,18 @@ def geterror(weight, x, y):
         predict = 0.0
         for b in range(base):
             predict += weight_new[b] * (x_**b)
-            print(predict)
+            # print(predict)
         error += (predict - y_) ** 2
     return error
+
+def LSE(x, y, base, rate):
+    features = genfeatures(x, base)
+    matrix = genmatrix(features, rate)
+    b = genb(features, y)
+    L, U = mat.LUdecomposition(matrix)
+    weight = mat.LUsolver(L, U, b)
+    error = geterror(weight, x, y)
+    return weight, error
 
 if __name__ == '__main__':
     # A = np.array([
