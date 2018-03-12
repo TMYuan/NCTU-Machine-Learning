@@ -4,20 +4,21 @@ import solve
 
 def getHessionInv(features):
     # hession = 2(A^T)A
-    hession = 2 * np.matmul(features.T, features)
+    features_T = mat.transpose(features)
+    hession = 2 * mat.mul(features_T, features)
     return mat.inv(hession)
 
 def getGradient(features, weight, target):
-    features = np.matrix(features)
-    weight = np.matrix(weight)
-    target = np.matrix(target)
-
     # gradient = 2(A^T)Ax - 2(A^T)b
-    gradient = 2 * features.T * features * weight - 2 * features.T * target
-    return np.array(gradient)
+    # gradient = 2 * features.T * features * weight - 2 * features.T * target
+    features_T = mat.transpose(features)
+    gradient = 2 * mat.mul(mat.mul(features_T, features), weight)
+    gradient -= 2 * mat.mul(features_T, target)
+    return gradient
 
 def newtonmethod(hession_inv, gradient, weight):
-    return weight - np.matmul(hession_inv, gradient)
+    # x1 = x0 - (H^-1)(gradient)
+    return weight - mat.mul(hession_inv, gradient)
 
 
 def optimize(x, y, base):
