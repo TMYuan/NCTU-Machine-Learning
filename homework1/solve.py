@@ -3,6 +3,12 @@ import matrix as mat
 from sklearn.preprocessing import PolynomialFeatures
 
 def genfeatures(x, degree):
+    """
+    Generate features from original input data.
+    e.g.
+    degree = 3
+    [1 x x^2]
+    """
     features = []
     for point in x:
         features.append([point**base for base in range(degree)])
@@ -12,7 +18,7 @@ def genmatrix(features, rate):
     """
     input: A, rate
     output: (A^T)(A) - (rate)(I)
-    This function will return (A^T)(A)
+    This function will return (A^T)(A) - rate * I
     """
     matrix = mat.mul(mat.transpose(features), features)
     matrix -= rate * np.eye(matrix.shape[0])
@@ -28,6 +34,11 @@ def genb(features, y):
     return b
 
 def geterror(weight, x, y):
+    """
+    input: weight, input data, target
+    output: square error
+    This function will calculate square error between prediction and target.
+    """
     base = weight.shape[0]
     weight_new = weight.flatten()
     error = 0.0
@@ -42,6 +53,7 @@ def geterror(weight, x, y):
 
 def LSE(x, y, base, rate):
     features = genfeatures(x, base)
+    print(features)
     matrix = genmatrix(features, rate)
     b = genb(features, y)
     L, U = mat.LUdecomposition(matrix)
