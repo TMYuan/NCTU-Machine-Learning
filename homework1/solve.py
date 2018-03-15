@@ -53,7 +53,7 @@ def geterror(weight, x, y):
 
 def LSE(x, y, base, rate):
     features = genfeatures(x, base)
-    print(features)
+    # print(features)
     matrix = genmatrix(features, rate)
     b = genb(features, y)
     L, U = mat.LUdecomposition(matrix)
