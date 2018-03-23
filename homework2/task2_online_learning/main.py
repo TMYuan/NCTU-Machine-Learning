@@ -2,7 +2,7 @@ import argparse
 import data
 import numpy as np
 
-parser = argparse.ArgumentParser(description='It is a program for ML HW#1.')
+parser = argparse.ArgumentParser(description='It is a program for ML HW#2.')
 parser.add_argument('file_path', help='file path of input', type=str)
 parser.add_argument('beta_a', help='value "a" of initial beta function', type=int)
 parser.add_argument('beta_b', help='value "b" of initial beta function', type=int)
