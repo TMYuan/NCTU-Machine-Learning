@@ -12,8 +12,8 @@ def read(img_path, lbl_path):
         lbl = np.fromfile(flbl, dtype=np.int8)
 
     with open(img_path, 'rb') as fimg:
-        magic, num, rows, cols = struct.unpack(">IIII", fimg.read(16))
-        img = np.fromfile(fimg, dtype=np.uint8).reshape(len(lbl), rows, cols)
+        _, num, _, _ = struct.unpack(">IIII", fimg.read(16))
+        img = np.fromfile(fimg, dtype=np.uint8).reshape(num, -1)
 
     return (img, lbl)
 
@@ -30,6 +30,7 @@ def show(image):
     ax.yaxis.set_ticks_position('left')
     pyplot.show()
 
-img, lbl = read('./train-images.idx3-ubyte', 'train-labels.idx1-ubyte')
-print(lbl[3])
-show(img[3])
+if __name__ == '__main__':
+    img, lbl = read('./train-images.idx3-ubyte', 'train-labels.idx1-ubyte')
+    print(lbl[3])
+    show(img[3])
