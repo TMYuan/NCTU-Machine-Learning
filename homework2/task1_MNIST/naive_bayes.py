@@ -16,6 +16,20 @@ def calculateGaussian(train_img):
     gaussian_map[:, 1] = np.var(train_img, axis=0)
     return gaussian_map
 
+def gaussian(x, mean, sigma):
+    # return math.log((1 / (math.sqrt(2 * math.pi()) * sigma)) * (math.exp(-0.5 * ((x - mean)/sigma) ** 2)))
+    # if sigma <= 0.1:
+    #     if x == mean:
+    #         x = 0
+    #     else:
+    #         x = -1000
+    # else:
+    if sigma < 5:
+        sigma = 5
+    answer = 0
+    answer = math.log(1 / (sigma * math.sqrt(2 * math.pi))) - (0.5 * (math.pow((x-mean) / sigma, 2)))
+    return answer
+
 def discreteClassify(train_img, train_lbl, test_img, test_lbl):
     # Calculate P(Y)(prior), in this case, P(0), P(1), etc
     prior = np.zeros(10)
@@ -79,13 +93,46 @@ def continuousClassify(train_img, train_lbl, test_img, test_lbl):
     if os.path.isfile('./lookup_gau.npy'):
         look_up = np.load('./lookup_gau.npy')
     else:
-        for i in range(look_up.shape[0]):
+        for i in range(10):
             target = train_df[train_df['target'] == i].drop(['target'], axis=1).as_matrix()
             look_up[i, :, 0] = np.mean(target, axis=0)
             look_up[i, :, 1] = np.std(target, axis=0)
         print(look_up[0, :, 0])
         print(look_up.shape)
         np.save('./lookup_gau.npy', look_up)
+
+    # print(look_up[0, :, 0] == look_up[1, :, 0])
+    print(look_up[0, :, 0].reshape(28, 28))
+    # from matplotlib import pyplot
+    # fig = pyplot.figure()
+    # ax = fig.add_subplot(1,1,1)
+    # imgplot = ax.imshow(look_up[9, :, 1].reshape(28, 28))
+    # imgplot.set_interpolation('nearest')
+    # ax.xaxis.set_ticks_position('top')
+    # ax.yaxis.set_ticks_position('left')
+    # pyplot.show()
+
+    # Calculate each feature probability for each class in each row in test case
+    prediction = []
+    for i in range(test_img.shape[0]):
+        print('-'*20)
+        print('No. {} data'.format(i))
+        posterier = np.zeros(10)
+        posterier = prior.copy()
+        for j in range(10):
+            for k in range(test_img.shape[1]):
+                x = test_img[i][k]
+                mean = look_up[j][k][0]
+                std = look_up[j][k][1]
+                posterier[j] += gaussian(x, mean, std)
+        prediction.append(np.argmax(posterier))
+        print('Posterior: {}'.format(posterier))
+        print('Prediction: {}'.format(np.argmax(posterier)))
+        print('Answer: {}'.format(test_lbl[i]))
+    prediction = np.array(prediction)
+    error = np.count_nonzero(test_lbl != prediction) / len(test_lbl)
+    print('Error rate: {}'.format(error))
+
 
 def classify(train_img, train_lbl, test_img, test_lbl, mode):
     if mode == 0:
