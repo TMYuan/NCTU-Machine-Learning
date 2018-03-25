@@ -61,11 +61,35 @@ def discreteClassify(train_img, train_lbl, test_img, test_lbl):
     error = np.count_nonzero(test_lbl != prediction) / len(test_lbl)
     print('Error rate: {}'.format(error))
 
+def continuousClassify(train_img, train_lbl, test_img, test_lbl):
+    # Calculate P(Y)(prior), in this case, P(0), P(1), etc
+    prior = np.zeros(10)
+    for i in range(10):
+        total = len(train_lbl)
+        prior[i] = math.log(np.count_nonzero(train_lbl == i) / total)
+    print(prior)
+
+    # Generate dataframe from training data.
+    train_df = pd.DataFrame(train_img)
+    train_df['target'] = train_lbl
+    print(train_df)
+
+    # Prepare a matrix to store every combination for use
+    look_up = np.zeros((10, train_img.shape[1], 2))
+    if os.path.isfile('./lookup_gau.npy'):
+        look_up = np.load('./lookup_gau.npy')
+    else:
+        for i in range(look_up.shape[0]):
+            target = train_df[train_df['target'] == i].drop(['target'], axis=1).as_matrix()
+            look_up[i, :, 0] = np.mean(target, axis=0)
+            look_up[i, :, 1] = np.std(target, axis=0)
+        print(look_up[0, :, 0])
+        print(look_up.shape)
+        np.save('./lookup_gau.npy', look_up)
 
 def classify(train_img, train_lbl, test_img, test_lbl, mode):
     if mode == 0:
         train_img, test_img = discreteData(train_img, test_img)
         discreteClassify(train_img, train_lbl, test_img, test_lbl)
     else:
-        gaussian_map = calculateGaussian(train_img)
-        print(gaussian_map.shape)
+        continuousClassify(train_img, train_lbl, test_img, test_lbl)
