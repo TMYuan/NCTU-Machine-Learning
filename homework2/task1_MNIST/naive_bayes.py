@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import math
+import os.path
 
 def discreteData(train_img, test_img, bins=32):
     interval = 256 // bins
@@ -30,14 +31,20 @@ def discreteClassify(train_img, train_lbl, test_img, test_lbl):
 
     # Prepare a matrix to store every combination for use
     look_up = np.zeros((10, train_img.shape[1], 32))
-    for i in range(look_up.shape[0]):
-        for j in range(look_up.shape[1]):
-            class_count = len(train_df['target'] == i)
-            for k in range(look_up.shape[2]):
-                count = len(train_df[(train_df[j] == k) & (train_df['target'] == i)])
-                look_up[i][j][k] = math.log((count + 1) / (class_count + 32*1))
+    if os.path.isfile('./lookup.npy'):
+        look_up = np.load('./lookup.npy')
+    else:
+        for i in range(look_up.shape[0]):
+            for j in range(look_up.shape[1]):
+                class_count = len(train_df[train_df['target'] == i])
+                for k in range(look_up.shape[2]):
+                    # Laplacian Smoothing
+                    count = len(train_df[(train_df[j] == k) & (train_df['target'] == i)])
+                    look_up[i][j][k] = math.log((count + 1) / (class_count + 32*1))
+        np.save('./lookup.npy', look_up)
 
     # Calculate each feature probability for each class in each row in test case
+    prediction = []
     for i in range(test_img.shape[0]):
         print('-'*20)
         print('No. {} data'.format(i))
@@ -46,7 +53,13 @@ def discreteClassify(train_img, train_lbl, test_img, test_lbl):
             posterier[j] += prior[j]
             for k in range(test_img.shape[1]):
                 posterier[j] += look_up[j][k][test_img[i][k]]
-        print(posterier)
+        prediction.append(np.argmax(posterier))
+        print('Posterior: {}'.format(posterier))
+        print('Prediction: {}'.format(np.argmax(posterier)))
+        print('Answer: {}'.format(test_lbl[i]))
+    prediction = np.array(prediction)
+    error = np.count_nonzero(test_lbl != prediction) / len(test_lbl)
+    print('Error rate: {}'.format(error))
 
 
 def classify(train_img, train_lbl, test_img, test_lbl, mode):
