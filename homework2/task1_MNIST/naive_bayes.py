@@ -24,9 +24,8 @@ def gaussian(x, mean, sigma):
     #     else:
     #         x = -1000
     # else:
-    if sigma < 5:
-        sigma = 5
-    answer = 0
+    if sigma < 10:
+        sigma = 10
     answer = math.log(1 / (sigma * math.sqrt(2 * math.pi))) - (0.5 * (math.pow((x-mean) / sigma, 2)))
     return answer
 
@@ -62,9 +61,8 @@ def discreteClassify(train_img, train_lbl, test_img, test_lbl):
     for i in range(test_img.shape[0]):
         print('-'*20)
         print('No. {} data'.format(i))
-        posterier = np.zeros(10)
+        posterier = prior.copy()
         for j in range(10):
-            posterier[j] += prior[j]
             for k in range(test_img.shape[1]):
                 posterier[j] += look_up[j][k][test_img[i][k]]
         prediction.append(np.argmax(posterier))
@@ -101,23 +99,12 @@ def continuousClassify(train_img, train_lbl, test_img, test_lbl):
         print(look_up.shape)
         np.save('./lookup_gau.npy', look_up)
 
-    # print(look_up[0, :, 0] == look_up[1, :, 0])
-    print(look_up[0, :, 0].reshape(28, 28))
-    # from matplotlib import pyplot
-    # fig = pyplot.figure()
-    # ax = fig.add_subplot(1,1,1)
-    # imgplot = ax.imshow(look_up[9, :, 1].reshape(28, 28))
-    # imgplot.set_interpolation('nearest')
-    # ax.xaxis.set_ticks_position('top')
-    # ax.yaxis.set_ticks_position('left')
-    # pyplot.show()
 
     # Calculate each feature probability for each class in each row in test case
     prediction = []
     for i in range(test_img.shape[0]):
         print('-'*20)
         print('No. {} data'.format(i))
-        posterier = np.zeros(10)
         posterier = prior.copy()
         for j in range(10):
             for k in range(test_img.shape[1]):
