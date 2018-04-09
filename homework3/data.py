@@ -1,4 +1,5 @@
 import random
+import numpy as np
 
 def gaussianGenerator(mean, variance):
     """
@@ -10,13 +11,17 @@ def gaussianGenerator(mean, variance):
     z = total - 6
     return mean + z * (variance**0.5)
 
-def polyBasisModel(basis, variance, weight):
+def polyBasisModel(basis, variance, weight, x):
     """
     This function will return a target point with a given linear polynomial model.
     """
-    x = random.uniform(-10, 10)
     y = gaussianGenerator(0, variance)
     for i in range(basis):
-        y += weight[i] * (x ** basis)
+        y += weight[i] * (x ** i)
     return y
 
+def designMatrix(basis, x):
+    design_matrix = []
+    for i in range(basis):
+        design_matrix.append(x ** i)
+    return np.array(design_matrix).reshape(1, -1)
